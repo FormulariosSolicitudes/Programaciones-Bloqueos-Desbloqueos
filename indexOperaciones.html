@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario Soporte</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f2fb;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        h2,
+        h3 {
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px 0;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-bottom: 2px solid #673ab7;
+        }
+
+        .opcion {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .bloque {
+            display: none;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        button {
+            background: #673ab7;
+            color: white;
+            padding: 12px;
+            border: none;
+            margin-top: 20px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <center>
+    <h2>Formulario de Solicitud</h2>
+    </center>
+
+    <form id="formSoporte">
+
+        <h3>Datos del solicitante</h3>
+
+        <input type="text" id="nombre" placeholder="Nombre" required>
+        <input type="text" id="cedula" placeholder="Cédula" required>
+        <input type="text" id="celular" placeholder="Celular" required>
+        <input type="email" id="correo" placeholder="Correo electrónico" required>
+
+        <h3>Tipo de solicitud</h3>
+
+        <label class="opcion">
+            <input type="checkbox" id="programacion"> Programación de Asesores
+        </label>
+
+        <label class="opcion">
+            <input type="checkbox" id="bloquear"> Bloquear usuario
+        </label>
+
+        <label class="opcion">
+            <input type="checkbox" id="desbloquear"> Desbloquear usuario
+        </label>
+
+        <!-- PROGRAMACION -->
+        <div id="bloqueProgramacion" class="bloque">
+            <input type="text" id="cedula_prog" placeholder="Cédula asesor">
+            <input type="text" id="codigo_pv_prog" placeholder="Código punto de venta">
+            <input type="text" id="nombre_pv_prog" placeholder="Nombre punto de venta">
+            <input type="date" id="fecha_prog">
+        </div>
+
+        <!-- BLOQUEAR -->
+        <div id="bloqueBloquear" class="bloque">
+            <input type="text" id="cedula_bloq" placeholder="Cédula del asesor">
+            <input type="text" id="nombre_bloq" placeholder="Nombre del asesor">
+        </div>
+
+        <!-- DESBLOQUEAR -->
+        <div id="bloqueDesbloquear" class="bloque">
+            <input type="text" id="cedula_desbloq" placeholder="Cédula del asesor">
+            <input type="text" id="nombre_desbloq" placeholder="Nombre del asesor">
+
+            <select id="plataforma">
+                <option value="">Seleccione plataforma</option>
+                <option value="Posslim">Posslim</option>
+                <option value="Superflex">Superflex</option>
+            </select>
+        </div>
+
+        <button type="submit">Enviar</button>
+
+    </form>
+
+    <script>
+        const checks = {
+            programacion: document.getElementById("programacion"),
+            bloquear: document.getElementById("bloquear"),
+            desbloquear: document.getElementById("desbloquear")
+        };
+
+        const bloques = {
+            programacion: document.getElementById("bloqueProgramacion"),
+            bloquear: document.getElementById("bloqueBloquear"),
+            desbloquear: document.getElementById("bloqueDesbloquear")
+        };
+
+        function activarOpcion(activa) {
+            Object.keys(checks).forEach(key => {
+                if (key !== activa) {
+                    checks[key].checked = false;
+                    checks[key].disabled = true;
+                    bloques[key].style.display = "none";
+
+                    bloques[key].querySelectorAll("input, textarea, select")
+                        .forEach(el => el.disabled = true);
+                }
+            });
+
+            bloques[activa].style.display = "block";
+            bloques[activa].querySelectorAll("input, textarea, select")
+                .forEach(el => el.disabled = false);
+        }
+
+        function resetTodo() {
+            Object.keys(checks).forEach(key => {
+                checks[key].disabled = false;
+                bloques[key].style.display = "none";
+
+                bloques[key].querySelectorAll("input, textarea, select")
+                    .forEach(el => el.disabled = true);
+            });
+        }
+
+        checks.programacion.addEventListener("change", () => {
+            checks.programacion.checked ? activarOpcion("programacion") : resetTodo();
+        });
+
+        checks.bloquear.addEventListener("change", () => {
+            checks.bloquear.checked ? activarOpcion("bloquear") : resetTodo();
+        });
+
+        checks.desbloquear.addEventListener("change", () => {
+            checks.desbloquear.checked ? activarOpcion("desbloquear") : resetTodo();
+        });
+
+        document.getElementById("formSoporte").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            let tipo = "";
+            let detalle = {};
+
+            if (checks.programacion.checked) {
+                tipo = "Programación";
+                detalle = {
+                    cedula_asesor: document.getElementById("cedula_prog").value,
+                    codigo_pv: document.getElementById("codigo_pv_prog").value,
+                    nombre_pv: document.getElementById("nombre_pv_prog").value,
+                    fecha: document.getElementById("fecha_prog").value
+                };
+            }
+
+            if (checks.bloquear.checked) {
+                tipo = "Bloquear usuario";
+                detalle = {
+                    cedula_asesor: document.getElementById("cedula_bloq").value,
+                    nombre_asesor: document.getElementById("nombre_bloq").value
+                };
+            }
+
+            if (checks.desbloquear.checked) {
+                tipo = "Desbloquear usuario";
+                detalle = {
+                    cedula_asesor: document.getElementById("cedula_desbloq").value,
+                    nombre_asesor: document.getElementById("nombre_desbloq").value,
+                    plataforma: document.getElementById("plataforma").value
+                };
+            }
+
+            const datos = {
+                nombre: document.getElementById("nombre").value,
+                cedula: document.getElementById("cedula").value,
+                celular: document.getElementById("celular").value,
+                correo: document.getElementById("correo").value,
+                tipo: tipo,
+                detalle: detalle
+            };
+
+            fetch("https://script.google.com/macros/s/AKfycbwuiYPYh7biRjCizWXV0dQjLGCRz8vp5d4ujhunr1h_dHeoN9HstKGjWYUsgRhu9qXSKQ/exec", {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify(datos)
+            });
+
+            alert("Solicitud enviada correctamente");
+
+            this.reset();
+            resetTodo();
+        });
+    </script>
+
+</body>
+
+</html>
